@@ -73,8 +73,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Top: Brand Header & Mobile Close */}
-        <div>
+        {/* Top: Brand Header & Mobile Close — scrollable nav area */}
+        <div className="overflow-y-auto flex-1">
           <div className="flex h-16 items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-6">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/20">

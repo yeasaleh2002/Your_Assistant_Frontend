@@ -14,6 +14,7 @@ import {
 
 export interface JobItem {
   id: string;
+  numericId?: number;
   title: string;
   company: string;
   companyLogo?: string;
@@ -25,10 +26,12 @@ export interface JobItem {
   careerUrl: string;
   tags: string[];
   descriptionSnippet: string;
+  recruiterEmail?: string | null;
 }
 
 interface JobCardProps {
   job: JobItem;
+  index?: number;
   onSaveToggle?: (jobId: string, isSaved: boolean) => void;
   onSelect?: (job: JobItem) => void;
 }
@@ -58,9 +61,9 @@ function CircularProgress({ score }: { score: number }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <div className="relative flex items-center justify-center">
-        <svg className="h-14 w-14 -rotate-90 transform" viewBox="0 0 56 56">
+        <svg className="h-12 w-12 sm:h-14 sm:w-14 -rotate-90 transform" viewBox="0 0 56 56">
           {/* Background circle */}
           <circle
             cx="28"
@@ -108,7 +111,7 @@ function CircularProgress({ score }: { score: number }) {
   );
 }
 
-export function JobCard({ job, onSaveToggle, onSelect }: JobCardProps) {
+export function JobCard({ job, index = 0, onSaveToggle, onSelect }: JobCardProps) {
   const [isSaved, setIsSaved] = React.useState(false);
 
   const handleSave = (e: React.MouseEvent) => {
@@ -128,37 +131,38 @@ export function JobCard({ job, onSaveToggle, onSelect }: JobCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
       onClick={() => onSelect && onSelect(job)}
-      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/40 hover:shadow-lg hover:shadow-indigo-500/5 cursor-pointer"
+      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/8 cursor-pointer"
     >
       <div>
         {/* Header: Company Monogram, Title, and Circular Score */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3.5">
+        <div className="flex items-start justify-between gap-3">
+          {/* Left: avatar + text, must not overflow */}
+          <div className="flex items-start gap-3 min-w-0 flex-1">
             {/* Company Avatar / Monogram */}
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm shadow-inner border border-slate-200/60 dark:border-slate-700/60">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 text-slate-800 dark:text-slate-200 font-bold text-sm shadow-inner border border-slate-200/60 dark:border-slate-700/60">
               {initials}
             </div>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-semibold text-xs text-slate-600 dark:text-slate-400 truncate max-w-[120px]">
                   {job.company}
                 </span>
-                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-300 shrink-0">
                   {job.type}
                 </span>
               </div>
-              <h3 className="mt-0.5 font-bold text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              <h3 className="mt-0.5 font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                 {job.title}
               </h3>
             </div>
           </div>
 
-          {/* Match Score Circular Progress */}
+          {/* Match Score Circular Progress — always shrinks */}
           <div className="shrink-0">
             <CircularProgress score={job.matchScore} />
           </div>

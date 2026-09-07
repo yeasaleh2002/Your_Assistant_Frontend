@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -67,6 +68,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              className: "dark:bg-slate-900 dark:text-slate-100 dark:border dark:border-slate-800 shadow-xl",
+              style: {
+                borderRadius: "14px",
+                fontSize: "13px",
+              },
+            }}
+          />
           <Navbar />
           <main className="flex-1 w-full">{children}</main>
           <Footer />
