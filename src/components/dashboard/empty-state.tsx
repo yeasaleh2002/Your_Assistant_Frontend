@@ -2,14 +2,16 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { RotateCcw, Lightbulb } from "lucide-react";
+import { RotateCcw, Lightbulb, Sparkles } from "lucide-react";
 
 interface EmptyStateProps {
   keyword?: string;
   onReset?: () => void;
+  onScanLive?: () => void;
+  isScanning?: boolean;
 }
 
-export function EmptyState({ keyword, onReset }: EmptyStateProps) {
+export function EmptyState({ keyword, onReset, onScanLive, isScanning }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -73,17 +75,31 @@ export function EmptyState({ keyword, onReset }: EmptyStateProps) {
         </div>
       </div>
 
-      {/* Reset button */}
-      {onReset && (
-        <button
-          type="button"
-          onClick={onReset}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-5 py-2.5 text-xs sm:text-sm font-semibold text-white dark:text-slate-900 shadow transition hover:bg-slate-800 dark:hover:bg-slate-100 active:scale-95"
-        >
-          <RotateCcw className="h-4 w-4" />
-          <span>Reset Search & Filters</span>
-        </button>
-      )}
+      {/* Action buttons */}
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        {onScanLive && (
+          <button
+            type="button"
+            onClick={onScanLive}
+            disabled={isScanning}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition active:scale-95 disabled:opacity-60"
+          >
+            <Sparkles className={`h-4 w-4 ${isScanning ? "animate-spin" : ""}`} />
+            <span>{isScanning ? "Scanning Live Web..." : "Run AI Live Radar Scan"}</span>
+          </button>
+        )}
+
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow transition hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95"
+          >
+            <RotateCcw className="h-4 w-4" />
+            <span>Reset Search & Filters</span>
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 }

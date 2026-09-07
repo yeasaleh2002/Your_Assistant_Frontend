@@ -89,7 +89,7 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
       // Graceful fallback using backend ReportLab engine directly if third-party LLM keys are unconfigured
       try {
         setAtsProgressMsg("Compiling direct ATS PDF with ReportLab engine...");
-        const fallbackMarkdown = `# Alex Rivera\n**${job.title}** | alex.rivera@example.com\n\n## PROFESSIONAL SUMMARY\nAccomplished engineer specialized in high-performance architectures, matching target requirements for ${job.company}.\n\n## CORE COMPETENCIES\n- ${job.tags.join(", ")}\n- Asynchronous System Design, REST APIs, TypeScript\n\n## PROFESSIONAL EXPERIENCE\n### Senior Systems Engineer | Tech Innovations (2022 - Present)\n- Developed distributed pipelines with sub-150ms latency.\n- Engineered zero-hallucination evaluation harnesses.`;
+        const fallbackMarkdown = `# Yeasaleh\n**Software Developer** | yeasaleh.contact@gmail.com | +8801735782467\nhttps://www.linkedin.com/in/yea-saleh | https://github.com/yeasaleh2002\n\n## PROFESSIONAL SUMMARY\nSoftware Developer specializing in scalable web applications using Next.js, Node.js, and TypeScript, tailored for ${job.title} at ${job.company}.\n\n## CORE COMPETENCIES\n- ${job.tags.join(", ")}\n- Next.js, React, TypeScript, Node.js, REST & GraphQL APIs, Supabase\n\n## PROFESSIONAL EXPERIENCE\n### Software Engineer | Nurix Hive (2025 - Present)\n- Architected backend systems and maintained architecture using Node.js, Supabase, and custom AI integrations.\n- Built fluid front-end interfaces with React, Next.js, and TypeScript.\n### Web Developer | Manaknight Digital (2023 - 2025)\n- Spearheaded full-stack feature development for enterprise React applications and RESTful services.`;
         const filename = `resume_${job.company.replace(/\s+/g, "_")}_ATS.pdf`;
 
         const pdfBlob = await apiService.generatePdfBlob({
@@ -126,8 +126,8 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
         email:
           job.recruiterEmail ||
           `careers@${job.company.toLowerCase().replace(/\s+/g, "")}.com`,
-        subject: `${job.title} - Alex Morgan | ${job.tags.slice(0, 2).join(" & ")} Specialist`,
-        body: `Dear ${job.company} Recruiting Team,\n\nI noticed your active opening for the ${job.title} role and wanted to reach out directly regarding my background in ${job.tags.join(", ")}.\n\nWith over 5 years architecting high-availability systems, I have scaled services handling high concurrency with verified 99.98% uptime. I have attached my tailored ATS resume for your review.\n\nI would welcome the opportunity to discuss how my experience aligns with your engineering roadmap.\n\nBest regards,\nAlex Morgan\nalex@assistant.ai`,
+        subject: `${job.title} - Yeasaleh | ${job.tags.slice(0, 2).join(" & ")} Specialist`,
+        body: `Dear ${job.company} Recruiting Team,\n\nI noticed your active opening for the ${job.title} role and wanted to reach out directly regarding my background in ${job.tags.join(", ")}.\n\nWith proven experience architecting scalable web applications using Next.js, Node.js, and TypeScript, I have engineered high-performance APIs and interactive frontends. I have attached my tailored ATS resume for your review.\n\nI would welcome the opportunity to discuss how my experience aligns with ${job.company}'s engineering roadmap.\n\nBest regards,\nYeasaleh\nyeasaleh.contact@gmail.com\nhttps://github.com/yeasaleh2002`,
       };
       setEmailResponse(fallbackEmail);
       setEmailState("success");

@@ -15,9 +15,13 @@ import {
   LogOut,
 } from "lucide-react";
 
+import { type AuthUser } from "@/services/api";
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
 }
 
 const DASHBOARD_NAV = [
@@ -54,7 +58,7 @@ const DASHBOARD_NAV = [
   },
 ];
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, currentUser, onLogout }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -178,25 +182,36 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="flex items-center justify-between rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/80 dark:bg-slate-900/70 p-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-bold text-xs">
-                AM
+                {currentUser?.email ? currentUser.email.slice(0, 2).toUpperCase() : "AD"}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
-                  Alex Morgan
+                  {currentUser?.role === "admin" ? "Administrator" : "User"}
                 </p>
                 <p className="truncate text-[10px] text-slate-500 dark:text-slate-400">
-                  alex@assistant.ai
+                  {currentUser?.email || "admin@yourassistant.com"}
                 </p>
               </div>
             </div>
 
-            <Link
-              href="/"
-              title="Return to Public Site"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition"
-            >
-              <LogOut className="h-4 w-4" />
-            </Link>
+            {onLogout ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                title="Sign out"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 hover:text-rose-600 dark:hover:text-rose-400 transition"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                title="Sign out"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition"
+              >
+                <LogOut className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         </div>
       </aside>

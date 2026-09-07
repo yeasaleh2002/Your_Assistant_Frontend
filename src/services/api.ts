@@ -1,7 +1,8 @@
 /**
  * Your Assistant - API Service Layer
- * Fully typed integration with FastAPI backend (http://127.0.0.1:8000).
- * Implements exact endpoints, headers, and payloads from Postman collection & README.
+ * Fully typed integration with FastAPI backend.
+ * Supports authentication, multi-source scraping, date-filtered jobs,
+ * application status tracking, and ATS resume generation.
  */
 
 import toast from "react-hot-toast";
@@ -9,9 +10,32 @@ import toast from "react-hot-toast";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "http://127.0.0.1:8000";
 
+const TOKEN_KEY = "your_assistant_jwt";
+
+// ==========================================
+// AUTH TOKEN HELPERS
+// ==========================================
+
+export function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setAuthToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function removeAuthToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
+}
+
 // ==========================================
 // TYPES & SCHEMAS (matching FastAPI models)
 // ==========================================
+
+export type JobStatus = "Pending" | "Applied" | "Interview" | "Rejected";
 
 export interface HealthResponse {
   service: string;
@@ -24,18 +48,45 @@ export interface BackendJob {
   id: number;
   title: string;
   company: string;
-  job_link: string;
-  career_page_link: string;
+  link: string;
+  career_page_link?: string | null;
   match_score: number;
-  recruiter_email: string | null;
-  created_at: string;
+  location: string;
+  status: JobStatus;
+  scraped_date: string; // YYYY-MM-DD
+  description?: string | null;
+  recruiter_email?: string | null;
+  created_at?: string | null;
 }
 
-export interface GetJobsParams {
-  job_keyword?: string;
-  min_score?: number;
-  skip?: number;
-  limit?: number;
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  expires_in_days?: number;
+  user?: {
+    email: string;
+    role: string;
+  };
+}
+
+export interface AuthUser {
+  email: string;
+  role: string;
+  authenticated: boolean;
+}
+
+export interface ScrapeTriggerResponse {
+  status: string;
+  scraped_count: number;
+  matched_count: number;
+  saved_count: number;
+  scraped_date?: string;
+  message: string;
 }
 
 export interface GenerateResumeResponse {
@@ -53,23 +104,6 @@ export interface GenerateEmailResponse {
   email: string | null;
   subject: string;
   body: string;
-}
-
-export interface CreateJobPayload {
-  title: string;
-  company: string;
-  job_link: string;
-  career_page_link: string;
-  match_score: number;
-  recruiter_email?: string | null;
-}
-
-export interface ScrapedJob {
-  title: string;
-  company: string;
-  description: string;
-  job_link: string;
-  career_page_link: string;
 }
 
 export interface GeneratePdfPayload {
@@ -104,6 +138,11 @@ async function request<T>(
     Accept: "application/json",
   };
 
+  const token = getAuthToken();
+  if (token) {
+    defaultHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   if (!(options.body instanceof FormData) && options.method && options.method !== "GET") {
     defaultHeaders["Content-Type"] = "application/json";
   }
@@ -126,7 +165,6 @@ async function request<T>(
         if (typeof errorJson.detail === "string") {
           detail = errorJson.detail;
         } else if (Array.isArray(errorJson.detail)) {
-          // Pydantic validation errors format: [{ loc, msg, type }]
           detail = errorJson.detail.map((e: { msg: string }) => e.msg).join("; ");
         } else if (errorJson.message) {
           detail = errorJson.message;
@@ -136,35 +174,27 @@ async function request<T>(
         if (errorText) detail = errorText.slice(0, 200);
       }
 
-      // Handle specific HTTP Status Codes with react-hot-toast
       if (!suppressToast) {
-        if (response.status === 429) {
-          toast.error("SlowAPI Rate Limit: Too many requests. Please wait a moment.", {
-            id: "rate-limit-toast",
-          });
+        if (response.status === 401) {
+          // Unauthorized - clear token if invalid
+          if (endpoint !== "/api/auth/login") {
+            removeAuthToken();
+            toast.error("Session expired. Please log in again.", { id: "auth-expired-toast" });
+          }
+        } else if (response.status === 429) {
+          toast.error("Rate limit exceeded. Please wait a moment.", { id: "rate-limit-toast" });
         } else if (response.status === 422) {
-          toast.error(`Validation Error: ${detail}`, {
-            id: "validation-error-toast",
-          });
+          toast.error(`Validation Error: ${detail}`, { id: "validation-error-toast" });
         } else if (response.status === 404) {
-          toast.error(detail || "Resource not found.", {
-            id: "not-found-toast",
-          });
-        } else if (response.status === 503) {
-          toast.error("AI Providers Exhausted: Multi-tier fallback failed. Check API keys.", {
-            id: "llm-exhausted-toast",
-          });
+          toast.error(detail || "Resource not found.", { id: "not-found-toast" });
         } else if (response.status >= 500) {
-          toast.error(`Server Error: ${detail}`, {
-            id: "server-error-toast",
-          });
+          toast.error(`Server Error: ${detail}`, { id: "server-error-toast" });
         }
       }
 
       throw new ApiError(response.status, detail);
     }
 
-    // Check if expected return is blob/file or JSON
     const contentType = response.headers.get("content-type") || "";
     if (contentType.includes("application/pdf") || contentType.includes("application/octet-stream")) {
       return (await response.blob()) as unknown as T;
@@ -178,7 +208,7 @@ async function request<T>(
 
     const message = error instanceof Error ? error.message : "Network error";
     if (!suppressToast) {
-      toast.error(`Network Error: Cannot reach backend at ${API_BASE_URL}. Ensure FastAPI is running.`, {
+      toast.error(`Network Error: Cannot reach backend at ${API_BASE_URL}. Ensure server is running.`, {
         id: "network-error-toast",
       });
     }
@@ -200,16 +230,62 @@ export const apiService = {
   },
 
   /**
-   * GET /jobs
-   * Retrieve discovered jobs with optional keyword & score filtering.
+   * POST /api/auth/login
+   * Authenticate against backend ADMIN_EMAIL and ADMIN_PASSWORD
    */
-  async getJobs(params: GetJobsParams = {}): Promise<BackendJob[]> {
-    const searchParams = new URLSearchParams();
-    if (params.job_keyword?.trim()) {
-      searchParams.set("job_keyword", params.job_keyword.trim());
+  async login(credentials: LoginRequest): Promise<LoginResponse> {
+    return request<LoginResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
+  },
+
+  /**
+   * GET /api/auth/me
+   * Retrieve current authenticated admin profile
+   */
+  async getMe(): Promise<AuthUser> {
+    return request<AuthUser>("/api/auth/me", {}, true);
+  },
+
+  /**
+   * POST /api/scrape
+   * Triggers multi-source scraping for 12 keywords, filters 24h & geography,
+   * computes RAG match against resume, and saves qualified jobs (>=65%) for today.
+   */
+  async triggerScraper(): Promise<ScrapeTriggerResponse> {
+    return request<ScrapeTriggerResponse>("/api/scrape", {
+      method: "POST",
+    });
+  },
+
+  /**
+   * POST /api/revalidate-jobs
+   * Triggers Next.js on-demand ISR Cache Tag purging
+   */
+  async revalidateJobs(tag?: string): Promise<void> {
+    try {
+      if (typeof window !== "undefined") {
+        await fetch("/api/revalidate-jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tag }),
+        });
+      }
+    } catch {
+      // Best-effort client invalidation
     }
-    if (params.min_score !== undefined && params.min_score !== null && params.min_score > 0) {
-      searchParams.set("min_score", String(params.min_score));
+  },
+
+  /**
+   * GET /api/cached-jobs?date=YYYY-MM-DD
+   * Leverages Next.js ISR with cache tags for instant sub-50ms responses.
+   * Falls back to direct backend endpoint if needed.
+   */
+  async getJobs(params: { date?: string; skip?: number; limit?: number; bypassCache?: boolean } = {}): Promise<BackendJob[]> {
+    const searchParams = new URLSearchParams();
+    if (params.date?.trim()) {
+      searchParams.set("date", params.date.trim());
     }
     if (params.skip !== undefined) {
       searchParams.set("skip", String(params.skip));
@@ -219,8 +295,51 @@ export const apiService = {
     }
 
     const query = searchParams.toString();
-    const endpoint = query ? `/jobs?${query}` : "/jobs";
+    
+    // In browser, hit Next.js ISR cached route handler
+    if (typeof window !== "undefined" && !params.bypassCache) {
+      const isrUrl = query ? `/api/cached-jobs?${query}` : "/api/cached-jobs";
+      try {
+        const res = await fetch(isrUrl, { cache: "default" });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback to direct backend request
+      }
+    }
+
+    const endpoint = query ? `/api/jobs?${query}` : "/api/jobs";
     return request<BackendJob[]>(endpoint);
+  },
+
+  /**
+   * PATCH /api/jobs/{id}/status
+   * Updates application status: 'Pending', 'Applied', 'Interview', 'Rejected'
+   */
+  async updateJobStatus(jobId: number, status: JobStatus): Promise<BackendJob> {
+    const updated = await request<BackendJob>(`/api/jobs/${jobId}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+    this.revalidateJobs("jobs");
+    return updated;
+  },
+
+  /**
+   * DELETE /api/jobs/date/{date}
+   * Deletes all scraped jobs for the specified date (YYYY-MM-DD).
+   */
+  async deleteJobsByDate(dateStr: string): Promise<{ status: string; date: string; deleted_count: number; message: string }> {
+    const res = await request<{ status: string; date: string; deleted_count: number; message: string }>(
+      `/api/jobs/date/${dateStr}`,
+      {
+        method: "DELETE",
+      }
+    );
+    this.revalidateJobs(`jobs-${dateStr}`);
+    this.revalidateJobs("jobs-today");
+    return res;
   },
 
   /**
@@ -252,41 +371,6 @@ export const apiService = {
       method: "POST",
       body: JSON.stringify(payload),
     });
-  },
-
-  /**
-   * POST /api/jobs
-   * Manually record a discovered job opportunity with strict Pydantic validation.
-   */
-  async createJob(payload: CreateJobPayload): Promise<BackendJob> {
-    return request<BackendJob>("/api/jobs", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  },
-
-  /**
-   * POST /api/jobs/scrape
-   * On-demand scraping via SerpApi with 7-day deduplication.
-   */
-  async scrapeJobs(keyword?: string, limit = 10): Promise<ScrapedJob[]> {
-    const searchParams = new URLSearchParams();
-    if (keyword?.trim()) searchParams.set("keyword", keyword.trim());
-    searchParams.set("limit", String(limit));
-    return request<ScrapedJob[]>(`/api/jobs/scrape?${searchParams.toString()}`, {
-      method: "POST",
-    });
-  },
-
-  /**
-   * POST /api/jobs/cleanup
-   * Triggers manual 7-day retention worker.
-   */
-  async cleanupJobs(retentionDays = 7): Promise<{ status: string; records_deleted: number }> {
-    return request<{ status: string; records_deleted: number }>(
-      `/api/jobs/cleanup?retention_days=${retentionDays}`,
-      { method: "POST" }
-    );
   },
 
   /**

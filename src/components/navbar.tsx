@@ -79,18 +79,18 @@ export function Navbar() {
           <ThemeToggle />
 
           <Link
-            href="/contact"
+            href="/login"
             className="hidden sm:inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white transition"
           >
-            Sign In
+            Admin Sign In
           </Link>
 
           <Link
-            href="/contact"
+            href="/dashboard"
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/25 transition duration-200 hover:shadow-lg hover:shadow-indigo-600/35 hover:brightness-110 active:scale-95"
             id="navbar-cta-button"
           >
-            <span>Get Started</span>
+            <span>Dashboard</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
 
@@ -130,18 +130,18 @@ export function Navbar() {
               ))}
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
                 <Link
-                  href="/contact"
+                  href="/login"
                   onClick={closeMobileMenu}
                   className="w-full text-center py-2 text-sm font-medium text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  Sign In
+                  Admin Sign In
                 </Link>
                 <Link
-                  href="/contact"
+                  href="/dashboard"
                   onClick={closeMobileMenu}
                   className="w-full text-center py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg shadow"
                 >
-                  Get Started Free
+                  Open Dashboard
                 </Link>
               </div>
             </div>
