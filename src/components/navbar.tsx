@@ -10,6 +10,7 @@ import { ThemeToggle } from "./theme-toggle";
 const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/#features", label: "Features" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/about", label: "About Us" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
@@ -22,6 +23,11 @@ export function Navbar() {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
+
+  // Hide public navbar on dashboard routes
+  if (pathname?.startsWith("/dashboard")) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full glass-nav transition-all">
