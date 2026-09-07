@@ -30,6 +30,7 @@ export interface JobItem {
 interface JobCardProps {
   job: JobItem;
   onSaveToggle?: (jobId: string, isSaved: boolean) => void;
+  onSelect?: (job: JobItem) => void;
 }
 
 /**
@@ -107,10 +108,11 @@ function CircularProgress({ score }: { score: number }) {
   );
 }
 
-export function JobCard({ job, onSaveToggle }: JobCardProps) {
+export function JobCard({ job, onSaveToggle, onSelect }: JobCardProps) {
   const [isSaved, setIsSaved] = React.useState(false);
 
-  const handleSave = () => {
+  const handleSave = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const nextSaved = !isSaved;
     setIsSaved(nextSaved);
     if (onSaveToggle) onSaveToggle(job.id, nextSaved);
@@ -129,7 +131,8 @@ export function JobCard({ job, onSaveToggle }: JobCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/40 hover:shadow-lg hover:shadow-indigo-500/5"
+      onClick={() => onSelect && onSelect(job)}
+      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800/90 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-500/40 hover:shadow-lg hover:shadow-indigo-500/5 cursor-pointer"
     >
       <div>
         {/* Header: Company Monogram, Title, and Circular Score */}
@@ -195,13 +198,13 @@ export function JobCard({ job, onSaveToggle }: JobCardProps) {
         </div>
       </div>
 
-      {/* Footer Actions: Bookmark & Career Page Link */}
+      {/* Footer Actions: Bookmark, Inspect & Career Link */}
       <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={handleSave}
           aria-label={isSaved ? "Remove from saved" : "Save job"}
-          className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition ${
+          className={`inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium transition ${
             isSaved
               ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
               : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -215,20 +218,35 @@ export function JobCard({ job, onSaveToggle }: JobCardProps) {
           ) : (
             <>
               <Bookmark className="h-4 w-4" />
-              <span>Save Job</span>
+              <span>Save</span>
             </>
           )}
         </button>
 
-        <a
-          href={job.careerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
-        >
-          <span>Career Page</span>
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSelect) onSelect(job);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 text-xs font-semibold transition"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
+            <span>AI Actions</span>
+          </button>
+
+          <a
+            href={job.careerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 rounded-xl bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-3 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
+          >
+            <span>Career</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
       </div>
     </motion.div>
   );

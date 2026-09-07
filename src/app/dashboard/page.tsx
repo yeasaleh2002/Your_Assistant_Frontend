@@ -11,6 +11,7 @@ import { JobSearchInput } from "@/components/dashboard/job-search-input";
 import { JobCard, type JobItem } from "@/components/dashboard/job-card";
 import { JobSkeletonGrid } from "@/components/dashboard/job-skeleton";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import { JobActionModal } from "@/components/dashboard/job-action-modal";
 
 // Rich mock data representing realistic AI, Frontend, and Full Stack positions
 const MOCK_JOBS: JobItem[] = [
@@ -132,6 +133,7 @@ export default function DashboardPage() {
   const [searchKeyword, setSearchKeyword] = React.useState("");
   const [selectedType, setSelectedType] = React.useState<string>("All");
   const [minScore, setMinScore] = React.useState<number>(0);
+  const [selectedJob, setSelectedJob] = React.useState<JobItem | null>(null);
 
   // Visual simulation states for QA and inspection
   const [forceLoading, setForceLoading] = React.useState(false);
@@ -358,12 +360,24 @@ export default function DashboardPage() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {filteredJobs.map((job) => (
-                <JobCard key={job.id} job={job} />
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onSelect={(selected) => setSelectedJob(selected)}
+                />
               ))}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Detailed Job Action Modal (Slide-over) */}
+      <JobActionModal
+        key={selectedJob?.id ?? "none"}
+        job={selectedJob}
+        isOpen={!!selectedJob}
+        onClose={() => setSelectedJob(null)}
+      />
     </div>
   );
 }
