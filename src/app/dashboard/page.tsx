@@ -131,6 +131,7 @@ function mapBackendJobToItem(b: BackendJob): JobItem {
     careerUrl: b.career_page_link || b.link || (b as unknown as { job_link?: string }).job_link || "#",
     tags: extractTechTags(b.title, b.description),
     descriptionSnippet: extractSnippet(b.description, b.company),
+    description: b.description,
     status: b.status || "Pending",
     scrapedDate: b.scraped_date,
     recruiterEmail: b.recruiter_email,

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { type JobItem } from "./job-card";
+import { JobDescriptionViewer } from "./job-description-viewer";
 import { apiService, type GenerateEmailResponse } from "@/services/api";
 
 interface JobActionModalProps {
@@ -396,70 +397,8 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
                 </AnimatePresence>
               </div>
 
-              {/* SECTION: FULL JOB DESCRIPTION */}
-              <div className="space-y-6 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-                    About The Role
-                  </h3>
-                  <p>
-                    {job.company} is seeking an exceptional <strong>{job.title}</strong> to join the core engineering team. In this position, you will own the end-to-end design, execution, and scaling of mission-critical systems and agentic primitives.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-                    Key Responsibilities
-                  </h3>
-                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                    <li>Design resilient distributed architectures capable of handling high-concurrency requests with sub-150ms latency.</li>
-                    <li>Collaborate with cross-functional product teams to turn ambiguous technical requirements into verifiable production code.</li>
-                    <li>Build and maintain developer tools, SDKs, and automated regression suites.</li>
-                    <li>Lead technical RFCs, conduct rigorous code reviews, and mentor team engineers on best practices.</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-                    Qualifications & Tech Stack
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {job.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                    <li>3+ years experience with production TypeScript, Python, FastAPI, and vector RAG pipelines.</li>
-                    <li>Strong understanding of rate limiting, streaming responses, and ReportLab ATS PDF generation.</li>
-                    <li>Experience with ChromaDB, FastEmbed, and SQLite database persistence.</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-                    Compensation & Benefits
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
-                      <span className="font-semibold text-slate-900 dark:text-white">Base Salary:</span> {job.salary}
-                    </div>
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
-                      <span className="font-semibold text-slate-900 dark:text-white">Healthcare:</span> 100% Medical, Dental, Vision
-                    </div>
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
-                      <span className="font-semibold text-slate-900 dark:text-white">Remote Stipend:</span> $2,500 Home Office Setup
-                    </div>
-                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
-                      <span className="font-semibold text-slate-900 dark:text-white">Time Off:</span> Flexible Paid Time Off (PTO)
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* SECTION: FULL JOB DESCRIPTION (FROM DATABASE) */}
+              <JobDescriptionViewer job={job} />
             </div>
 
             {/* Sticky Footer Actions */}

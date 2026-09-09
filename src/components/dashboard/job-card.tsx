@@ -28,6 +28,7 @@ export interface JobItem {
   careerUrl: string;
   tags: string[];
   descriptionSnippet: string;
+  description?: string | null;
   status: JobStatus;
   scrapedDate?: string;
   recruiterEmail?: string | null;
