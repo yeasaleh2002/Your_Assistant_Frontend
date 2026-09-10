@@ -17,6 +17,8 @@ import {
   Check,
   RotateCcw,
   Sparkles,
+  Send,
+  FileCheck2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { type JobItem } from "./job-card";
@@ -40,6 +42,8 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
   const [emailState, setEmailState] = React.useState<ActionState>("idle");
   const [emailProgressMsg, setEmailProgressMsg] = React.useState("AI is crafting pitch...");
   const [copiedEmail, setCopiedEmail] = React.useState(false);
+  const [copiedCoverLetter, setCopiedCoverLetter] = React.useState(false);
+  const [outreachTab, setOutreachTab] = React.useState<"email" | "cover_letter">("email");
   const [emailResponse, setEmailResponse] = React.useState<GenerateEmailResponse | null>(null);
 
   // Handle ESC key to dismiss modal
@@ -139,13 +143,30 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
   const handleCopyEmail = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedEmail(true);
-    toast.success("Copied to clipboard!");
+    toast.success("Copied email to clipboard!");
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
+  const handleCopyCoverLetter = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCoverLetter(true);
+    toast.success("Cover letter copied to clipboard!");
+    setTimeout(() => setCopiedCoverLetter(false), 2000);
+  };
+
+  const mailtoUrl = React.useMemo(() => {
+    if (!emailResponse) return "#";
+    const recipient = emailResponse.email || job.recruiterEmail || "";
+    const subject = encodeURIComponent(emailResponse.subject || "");
+    const body = encodeURIComponent(emailResponse.body || "");
+    return `mailto:${recipient}?subject=${subject}&body=${body}`;
+  }, [emailResponse, job.recruiterEmail]);
+
   const fullEmailContent = emailResponse
     ? `To: ${emailResponse.email || "Hiring Team"}\nSubject: ${emailResponse.subject}\n\n${emailResponse.body}`
-    : `Subject: Application for ${job.title} – Alex Morgan\n\nHi ${job.company} Talent Team,\n\nI recently tracked your opening for the ${job.title} role and noticed your focus on ${job.tags.slice(0, 2).join(" and ")}.\n\nOver the past 5+ years, I have architected high-performance web systems and autonomous agent workflows with Next.js and TypeScript.\n\nBest regards,\nAlex Morgan\nalex@assistant.ai`;
+    : `Subject: Application for ${job.title} – Yeasaleh\n\nHi ${job.company} Talent Team,\n\nI recently tracked your opening for the ${job.title} role and noticed your focus on ${job.tags.slice(0, 2).join(" and ")}.\n\nOver the past 5+ years, I have architected high-performance web systems with Next.js and TypeScript.\n\nBest regards,\nYeasaleh\nyeasaleh.contact@gmail.com`;
+
+  const coverLetterContent = emailResponse?.cover_letter || `Dear ${job.company} Hiring Team,\n\nI am writing to express my enthusiastic interest in the ${job.title} position. With hands-on experience architecting full-stack web applications, reducing latency, and building scalable systems, I am confident in my ability to deliver immediate value.\n\nThroughout my career, I have specialized in Next.js, React, TypeScript, and distributed backend integrations. I welcome the opportunity to discuss how my skill set can accelerate ${job.company}'s engineering goals.\n\nSincerely,\nYeasaleh\n${job.title}\n+8801735782467 | yeasaleh.contact@gmail.com`;
 
   return (
     <AnimatePresence>
@@ -342,7 +363,7 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
                   </div>
                 </div>
 
-                {/* STYLED TEXTBOX FOR GENERATED EMAIL (Requirement 3) */}
+                {/* STYLED TEXTBOX FOR GENERATED EMAIL & COVER LETTER */}
                 <AnimatePresence>
                   {emailState === "success" && (
                     <motion.div
@@ -351,47 +372,106 @@ export function JobActionModal({ job, isOpen, onClose }: JobActionModalProps) {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden rounded-2xl border border-purple-200 dark:border-purple-900/80 bg-slate-50/80 dark:bg-slate-900/90 p-4 sm:p-5 space-y-3.5 shadow-sm"
                     >
+                      {/* Sub-tabs: Email Cover Letter vs Formal Cover Letter */}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-3">
-                        <div>
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                            FastAPI Generated Outreach Draft
-                          </span>
-                          {emailResponse?.email && (
-                            <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
-                              Extracted Recruiter: <span className="underline">{emailResponse.email}</span>
-                            </p>
-                          )}
+                        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setOutreachTab("email")}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                              outreachTab === "email"
+                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                            <span>Email Pitch</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOutreachTab("cover_letter")}
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                              outreachTab === "cover_letter"
+                                ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            }`}
+                          >
+                            <FileCheck2 className="h-3.5 w-3.5" />
+                            <span>Formal Cover Letter</span>
+                          </button>
                         </div>
 
-                        {/* Copy to Clipboard Feature Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleCopyEmail(fullEmailContent)}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
-                        >
-                          {copiedEmail ? (
-                            <>
-                              <Check className="h-3.5 w-3.5 text-emerald-300" />
-                              <span>Copied to Clipboard!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="h-3.5 w-3.5" />
-                              <span>Copy to Clipboard</span>
-                            </>
+                        {/* Action buttons based on active tab */}
+                        <div className="flex items-center gap-2">
+                          {outreachTab === "email" && (
+                            <a
+                              href={mailtoUrl}
+                              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-3 py-1.5 text-xs font-bold shadow-sm transition active:scale-95"
+                            >
+                              <Send className="h-3.5 w-3.5" />
+                              <span>mailto:</span>
+                            </a>
                           )}
-                        </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              outreachTab === "email"
+                                ? handleCopyEmail(fullEmailContent)
+                                : handleCopyCoverLetter(coverLetterContent)
+                            }
+                            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
+                          >
+                            {(outreachTab === "email" ? copiedEmail : copiedCoverLetter) ? (
+                              <>
+                                <Check className="h-3.5 w-3.5 text-emerald-300" />
+                                <span>Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>
+                                  {outreachTab === "email" ? "Copy Email" : "Copy Cover Letter"}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Styled Textbox */}
-                      <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-inner">
-                        <textarea
-                          readOnly
-                          rows={8}
-                          value={fullEmailContent}
-                          className="w-full resize-none bg-transparent font-sans text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed focus:outline-none"
-                        />
-                      </div>
+                      {/* Tab 1: Email Cover Letter */}
+                      {outreachTab === "email" && (
+                        <div className="space-y-2">
+                          {emailResponse?.email && (
+                            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                              <span>To: {emailResponse.email}</span>
+                              <span className="truncate max-w-xs text-indigo-600 dark:text-indigo-400">
+                                {emailResponse.subject}
+                              </span>
+                            </div>
+                          )}
+                          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-inner">
+                            <textarea
+                              readOnly
+                              rows={8}
+                              value={fullEmailContent}
+                              className="w-full resize-none bg-transparent font-sans text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tab 2: Full Formal Cover Letter */}
+                      {outreachTab === "cover_letter" && (
+                        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 shadow-inner">
+                          <textarea
+                            readOnly
+                            rows={10}
+                            value={coverLetterContent}
+                            className="w-full resize-none bg-transparent font-serif text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed focus:outline-none"
+                          />
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

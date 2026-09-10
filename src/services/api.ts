@@ -12,6 +12,8 @@ import type {
   JobDescriptionTailorResponse,
   CompanyPaginationResponse,
   CompanyQueryParams,
+  DedicatedCoverLetterResponse,
+  EmailAndCoverLetterResponse,
 } from "@/types/api";
 
 export const API_BASE_URL =
@@ -105,12 +107,14 @@ export interface GenerateResumeResponse {
   tailored_resume_markdown: string;
   pdf_filename: string;
   pdf_path: string;
+  download_url?: string;
 }
 
 export interface GenerateEmailResponse {
   email: string | null;
   subject: string;
   body: string;
+  cover_letter?: string;
 }
 
 export interface GeneratePdfPayload {
@@ -365,6 +369,16 @@ export const apiService = {
    */
   async generateEmail(jobId: number): Promise<GenerateEmailResponse> {
     return request<GenerateEmailResponse>(`/generate-email/${jobId}`, {
+      method: "POST",
+    });
+  },
+
+  /**
+   * POST /api/jobs/{id}/cover-letter (or /generate-cover-letter/{id})
+   * Dedicated endpoint for full formal ATS cover letter and email draft for target job ID.
+   */
+  async generateCoverLetter(jobId: number): Promise<DedicatedCoverLetterResponse> {
+    return request<DedicatedCoverLetterResponse>(`/generate-cover-letter/${jobId}`, {
       method: "POST",
     });
   },

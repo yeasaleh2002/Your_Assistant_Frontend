@@ -74,3 +74,24 @@ export interface CompanyQueryParams {
   limit?: number;
   sort?: "newest" | "oldest";
 }
+
+// ==========================================
+// Email & Cover Letter Response Types
+// ==========================================
+
+export interface EmailAndCoverLetterResponse {
+  email: string | null;
+  subject: string;
+  body: string;         // The email-formatted cover letter
+  cover_letter: string; // The full formal ATS cover letter
+}
+
+export interface DedicatedCoverLetterResponse {
+  status: string;
+  job_id: number;
+  job_title: string;
+  company: string;
+  cover_letter: string;
+  email_cover_letter: EmailAndCoverLetterResponse;
+}
+
