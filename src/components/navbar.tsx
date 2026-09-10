@@ -11,6 +11,8 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/#features", label: "Features" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard/tailor", label: "JD Tailor" },
+  { href: "/dashboard/companies", label: "Companies" },
   { href: "/about", label: "About Us" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },

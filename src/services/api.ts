@@ -6,6 +6,13 @@
  */
 
 import toast from "react-hot-toast";
+export * from "@/types/api";
+import type {
+  JobDescriptionTailorRequest,
+  JobDescriptionTailorResponse,
+  CompanyPaginationResponse,
+  CompanyQueryParams,
+} from "@/types/api";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, "") || "http://127.0.0.1:8000";
@@ -385,5 +392,57 @@ export const apiService = {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(blobUrl);
+  },
+
+  /**
+   * POST /api/job-description/tailor
+   * Dynamically tailors resume, matches RAG cosine score (%), and generates ATS PDF, cold email, & cover letter.
+   */
+  async tailorJobDescription(payload: JobDescriptionTailorRequest): Promise<JobDescriptionTailorResponse> {
+    return request<JobDescriptionTailorResponse>("/api/job-description/tailor", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
+   * GET /api/companies
+   * Search and filter authentic software companies across Saudi Arabia, UAE, Malaysia, Egypt, 2026 AI startups, etc.
+   */
+  async getCompanies(params: CompanyQueryParams = {}): Promise<CompanyPaginationResponse> {
+    const searchParams = new URLSearchParams();
+    if (params.country?.trim()) searchParams.set("country", params.country.trim());
+    if (params.year !== undefined && params.year !== null) searchParams.set("year", String(params.year));
+    if (params.founded_year_min !== undefined) searchParams.set("founded_year_min", String(params.founded_year_min));
+    if (params.founded_year_max !== undefined) searchParams.set("founded_year_max", String(params.founded_year_max));
+    if (params.search?.trim()) searchParams.set("search", params.search.trim());
+    if (params.remote_policy?.trim()) searchParams.set("remote_policy", params.remote_policy.trim());
+    if (params.page !== undefined) searchParams.set("page", String(params.page));
+    if (params.limit !== undefined) searchParams.set("limit", String(params.limit));
+    if (params.sort?.trim()) searchParams.set("sort", params.sort.trim());
+
+    const qs = searchParams.toString();
+    const endpoint = qs ? `/api/companies?${qs}` : "/api/companies";
+    return request<CompanyPaginationResponse>(endpoint);
+  },
+
+  /**
+   * Download a generated tailored resume PDF from /api/resume/download/{filename}
+   */
+  downloadTailoredPdf(downloadUrl: string, filename?: string) {
+    if (typeof window === "undefined") return;
+    const fullUrl = downloadUrl.startsWith("http")
+      ? downloadUrl
+      : `${API_BASE_URL}${downloadUrl.startsWith("/") ? downloadUrl : `/${downloadUrl}`}`;
+
+    const link = document.createElement("a");
+    link.href = fullUrl;
+    if (filename) {
+      link.setAttribute("download", filename);
+    }
+    link.setAttribute("target", "_blank");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   },
 };

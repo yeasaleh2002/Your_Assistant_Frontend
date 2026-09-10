@@ -13,6 +13,7 @@ import {
   X,
   Zap,
   LogOut,
+  Building2,
 } from "lucide-react";
 
 import { type AuthUser } from "@/services/api";
@@ -33,17 +34,23 @@ const DASHBOARD_NAV = [
     badgeType: "live",
   },
   {
+    href: "/dashboard/tailor",
+    label: "JD Tailor Studio",
+    icon: Sparkles,
+    badge: "AI RAG",
+    badgeType: "new",
+  },
+  {
+    href: "/dashboard/companies",
+    label: "Company Directory",
+    icon: Building2,
+    badge: "100+",
+  },
+  {
     href: "/dashboard#saved",
     label: "Saved Roles",
     icon: Bookmark,
     badge: "4",
-  },
-  {
-    href: "/dashboard#ai-match",
-    label: "AI Match Analyzer",
-    icon: Sparkles,
-    badge: "New",
-    badgeType: "new",
   },
   {
     href: "/dashboard#applications",
@@ -112,7 +119,10 @@ export function Sidebar({ isOpen, onClose, currentUser, onLogout }: SidebarProps
             </div>
             {DASHBOARD_NAV.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || (item.href === "/dashboard" && pathname === "/dashboard");
+              const isActive =
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname === item.href || (pathname?.startsWith(item.href) && !item.href.includes("#"));
               return (
                 <Link
                   key={item.label}

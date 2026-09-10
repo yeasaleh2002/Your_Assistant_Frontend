@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
@@ -14,7 +15,8 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
+  Building2,
+  ArrowRight,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { JobCard, type JobItem } from "@/components/dashboard/job-card";
@@ -358,6 +360,65 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ================= NEW FEATURES QUICK LAUNCH ROW ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1: Direct JD Tailoring */}
+        <Link
+          href="/dashboard/tailor"
+          className="group relative overflow-hidden rounded-3xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-tr from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:via-slate-900 dark:to-purple-950/20 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-700 transition duration-200"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Direct Job Description Tailoring
+                  </h3>
+                  <span className="rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] px-2 py-0.5 font-bold">
+                    New Studio
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
+                  Paste raw job postings to compute vector RAG match %, generate 100% ATS PDF, cold email draft, and cover letter.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition shrink-0 mt-2" />
+          </div>
+        </Link>
+
+        {/* Card 2: Verified Companies Directory */}
+        <Link
+          href="/dashboard/companies"
+          className="group relative overflow-hidden rounded-3xl border border-purple-200/80 dark:border-purple-900/60 bg-gradient-to-tr from-purple-50/70 via-white to-indigo-50/40 dark:from-purple-950/40 dark:via-slate-900 dark:to-indigo-950/20 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-purple-400 dark:hover:border-purple-700 transition duration-200"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-md shadow-purple-600/20 group-hover:scale-105 transition-transform">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                    Verified Companies Directory
+                  </h3>
+                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] px-2 py-0.5 font-bold">
+                    100+ Authentic
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
+                  Browse verified hiring tech companies across Saudi Arabia, UAE, Malaysia, and 2026 AI startups with direct career links.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-1 transition shrink-0 mt-2" />
+          </div>
+        </Link>
       </div>
 
       {/* ================= GLOBAL SCRAPING PROGRESS BANNER ================= */}
