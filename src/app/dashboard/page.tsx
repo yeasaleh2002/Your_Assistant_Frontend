@@ -17,12 +17,14 @@ import {
   ChevronRight,
   Building2,
   ArrowRight,
+  FileCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { JobCard, type JobItem } from "@/components/dashboard/job-card";
 import { JobSkeletonGrid } from "@/components/dashboard/job-skeleton";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { JobActionModal } from "@/components/dashboard/job-action-modal";
+import { SmartJobMatchDashboard } from "@/components/dashboard/smart-job-match-dashboard";
 import { apiService, type BackendJob, type JobStatus } from "@/services/api";
 
 function formatRelativeTime(dateString?: string | null): string {
@@ -141,6 +143,7 @@ function mapBackendJobToItem(b: BackendJob): JobItem {
 }
 
 export default function DashboardPage() {
+  const [activeDashboardView, setActiveDashboardView] = React.useState<"smart" | "radar">("smart");
   const [selectedDate, setSelectedDate] = React.useState<string>(getTodayString());
   const [selectedStatusFilter, setSelectedStatusFilter] = React.useState<string>("All");
   const [selectedTypeFilter, setSelectedTypeFilter] = React.useState<string>("All");
@@ -363,60 +366,88 @@ export default function DashboardPage() {
       </div>
 
       {/* ================= NEW FEATURES QUICK LAUNCH ROW ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Card 1: Direct JD Tailoring */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Resume & Cover Letter Engine */}
         <Link
-          href="/dashboard/tailor"
-          className="group relative overflow-hidden rounded-3xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-tr from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:via-slate-900 dark:to-purple-950/20 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-700 transition duration-200"
+          href="/builder"
+          className="group relative overflow-hidden rounded-3xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-tr from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/40 dark:via-slate-900 dark:to-purple-950/20 p-5 shadow-xs hover:shadow-md hover:border-indigo-400 dark:hover:border-indigo-700 transition duration-200"
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
-                <Sparkles className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20 group-hover:scale-105 transition-transform">
+                <FileCheck className="h-5 w-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
-                    Direct Job Description Tailoring
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Resume & Cover Engine
                   </h3>
-                  <span className="rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] px-2 py-0.5 font-bold">
-                    New Studio
+                  <span className="rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] px-2 py-0.5 font-bold">
+                    GSAP
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
-                  Paste raw job postings to compute vector RAG match %, generate 100% ATS PDF, cold email draft, and cover letter.
+                  Interactive multi-step RAG engine with GSAP telemetry, ATS PDF export, and cover letter synthesis.
                 </p>
               </div>
             </div>
-            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition shrink-0 mt-2" />
+            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition shrink-0 mt-1" />
           </div>
         </Link>
 
-        {/* Card 2: Verified Companies Directory */}
+        {/* Card 2: Direct JD Tailoring */}
         <Link
-          href="/dashboard/companies"
-          className="group relative overflow-hidden rounded-3xl border border-purple-200/80 dark:border-purple-900/60 bg-gradient-to-tr from-purple-50/70 via-white to-indigo-50/40 dark:from-purple-950/40 dark:via-slate-900 dark:to-indigo-950/20 p-5 sm:p-6 shadow-sm hover:shadow-md hover:border-purple-400 dark:hover:border-purple-700 transition duration-200"
+          href="/dashboard/tailor"
+          className="group relative overflow-hidden rounded-3xl border border-purple-200/80 dark:border-purple-900/60 bg-gradient-to-tr from-purple-50/70 via-white to-indigo-50/40 dark:from-purple-950/40 dark:via-slate-900 dark:to-indigo-950/20 p-5 shadow-xs hover:shadow-md hover:border-purple-400 dark:hover:border-purple-700 transition duration-200"
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-md shadow-purple-600/20 group-hover:scale-105 transition-transform">
-                <Building2 className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-600 text-white shadow-md shadow-purple-600/20 group-hover:scale-105 transition-transform">
+                <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
-                    Verified Companies Directory
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Direct JD Tailor Studio
                   </h3>
-                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] px-2 py-0.5 font-bold">
-                    100+ Authentic
+                  <span className="rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] px-2 py-0.5 font-bold">
+                    Raw Paste
                   </span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
-                  Browse verified hiring tech companies across Saudi Arabia, UAE, Malaysia, and 2026 AI startups with direct career links.
+                  Paste raw job postings to compute vector RAG match %, generate ATS PDF, and cold email drafts.
                 </p>
               </div>
             </div>
-            <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-1 transition shrink-0 mt-2" />
+            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-1 transition shrink-0 mt-1" />
+          </div>
+        </Link>
+
+        {/* Card 3: Verified Companies Directory */}
+        <Link
+          href="/dashboard/companies"
+          className="group relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 shadow-xs hover:shadow-md hover:border-slate-400 dark:hover:border-slate-700 transition duration-200"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-800 dark:bg-slate-700 text-white shadow-md group-hover:scale-105 transition-transform">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Verified Companies
+                  </h3>
+                  <span className="rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] px-2 py-0.5 font-bold">
+                    100+
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">
+                  Browse hiring tech companies across Saudi Arabia, UAE, Malaysia, and 2026 AI startups.
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white group-hover:translate-x-1 transition shrink-0 mt-1" />
           </div>
         </Link>
       </div>
@@ -455,8 +486,40 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      {/* ================= REQUIREMENT 3: DATE CONTROLS & DANGER ZONE ================= */}
-      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm space-y-5">
+      {/* ================= VIEW SELECTOR TABS ================= */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <button
+          type="button"
+          onClick={() => setActiveDashboardView("smart")}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition ${
+            activeDashboardView === "smart"
+              ? "bg-indigo-600 text-white shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Sparkles className="h-4 w-4" />
+          <span>Smart Match View (Accordion & Rings)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveDashboardView("radar")}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition ${
+            activeDashboardView === "radar"
+              ? "bg-indigo-600 text-white shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Radar className="h-4 w-4" />
+          <span>Radar Feed & Date Archive</span>
+        </button>
+      </div>
+
+      {activeDashboardView === "smart" ? (
+        <SmartJobMatchDashboard />
+      ) : (
+        <>
+          {/* ================= REQUIREMENT 3: DATE CONTROLS & DANGER ZONE ================= */}
+          <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-5 sm:p-6 shadow-sm space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Date Selector and Shift Controls */}
           <div className="flex flex-wrap items-center gap-3">
@@ -681,6 +744,8 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
       </div>
+      </>
+      )}
 
       {/* Detailed Job Action Modal (Slide-over connected to FastAPI) */}
       <JobActionModal

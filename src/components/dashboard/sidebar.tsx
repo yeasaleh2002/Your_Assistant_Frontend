@@ -14,6 +14,7 @@ import {
   Zap,
   LogOut,
   Building2,
+  FileCheck,
 } from "lucide-react";
 
 import { type AuthUser } from "@/services/api";
@@ -32,6 +33,13 @@ const DASHBOARD_NAV = [
     icon: Radar,
     badge: "Live",
     badgeType: "live",
+  },
+  {
+    href: "/builder",
+    label: "Resume & Cover Engine",
+    icon: FileCheck,
+    badge: "New",
+    badgeType: "new",
   },
   {
     href: "/dashboard/tailor",
