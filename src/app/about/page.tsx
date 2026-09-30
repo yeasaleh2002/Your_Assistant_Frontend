@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     "Learn about Your Assistant's mission, values, and engineering vision to build autonomous AI agents for modern teams.",
 };
-
+ 
 // Dynamic import with skeleton fallback for performance & code-splitting
 const AboutContent = dynamic(() => import("@/components/pages/about-content"), {
   loading: () => <PageSkeleton title="Loading About Us..." />,
